@@ -22,8 +22,6 @@ import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 public class Bot extends TelegramLongPollingBot{
-
-    static String url = "https://rasp.sstu.ru/rasp/group/135";
     
     @Override
     public String getBotToken(){
@@ -54,7 +52,7 @@ public class Bot extends TelegramLongPollingBot{
     
     @Override
     public void onUpdateReceived(Update update) {
-         
+        
         if(update.hasMessage()){
             
             Chat ch = new Chat(update.getMessage().getChatId());

@@ -4,16 +4,13 @@
  */
 package BotsPack;
 
-import static BotsPack.Bot.url;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.IIOException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -36,9 +33,16 @@ public class Chat {
         File f = new File("..\\..\\Data\\Chats\\"+id+"\\group.txt");
         try {
             f.createNewFile();
+            try(FileWriter w = new FileWriter(f)){
+                w.write("https://rasp.sstu.ru/rasp/group/135");
+            }catch (IOException ex) {
+            Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } catch (IOException ex) {
             Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        
     }
     
     public void addGroup(String group) throws IOException{
