@@ -132,4 +132,12 @@ public class Schedule {
     public static boolean check(String command, String bot){
         return command.equals("/schedule") || command.equals("/schedule" + bot);
     }
+    
+    public static void action() {
+        try(FileWriter f = new FileWriter("..\\..\\Data\\action.txt")){
+            f.write("/schedule");
+        } catch (IOException ex) {
+            Logger.getLogger(Schedule.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
