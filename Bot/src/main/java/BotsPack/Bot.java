@@ -1,7 +1,9 @@
 package BotsPack;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Jsoup;
@@ -22,7 +24,14 @@ public class Bot extends TelegramLongPollingBot{
     
     @Override
     public String getBotToken(){
-        return "5781517112:AAEBHPVQ-zY8I2wXCyk9w8CiyNev80fIiP4";
+        String token = null;
+        try(FileReader f = new FileReader("..\\..\\Data\\token.txt")){
+            Scanner sc = new Scanner(f);
+            token = sc.nextLine();
+        } catch (IOException ex) {
+            Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return token;
     }
     
     @Override
