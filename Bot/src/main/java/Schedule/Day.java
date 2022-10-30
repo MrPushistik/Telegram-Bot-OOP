@@ -1,4 +1,4 @@
-package BotsPack;
+package Schedule;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -24,14 +24,14 @@ public class Day{
         setLessons(d.lessons);
     }
     
-    public void setLessons(List<Lesson> lessons){
+    private void setLessons(List<Lesson> lessons){
         this.lessons = new ArrayList<>();
-        for (Lesson l : lessons) this.lessons.add(new Lesson(l));
+        for (Lesson l : lessons) this.lessons.add(l);
     }
     
     public List<Lesson> getLessons(){
         List<Lesson> copy = new ArrayList<>();
-        for (Lesson l : this.lessons) copy.add(new Lesson(l));
+        for (Lesson l : this.lessons) copy.add(l);
         return copy;
     }
     

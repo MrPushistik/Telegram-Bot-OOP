@@ -1,5 +1,6 @@
 package BotsPack;
 
+import Schedule.ArrayDay;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,12 +24,14 @@ public class Bot extends TelegramLongPollingBot{
     
     @Override
     public String getBotToken(){
+        
         String token = null;
-        try(FileReader f = new FileReader("..\\..\\Data\\token.txt")){
+        
+        try(FileReader f = new FileReader("..\\..\\Data\\token.txt")){ 
             Scanner sc = new Scanner(f);
             token = sc.nextLine();
         } catch (IOException ex) {
-            Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex);  
         }
         return token;
     }
@@ -38,30 +41,51 @@ public class Bot extends TelegramLongPollingBot{
         return "@MrPushistikBot";
     }
     
-    public static String getAction(){
-        try(FileReader f = new FileReader("..\\..\\Data\\action.txt")){
-            Scanner sc= new Scanner(f);
-            return sc.nextLine();
-        } catch (IOException ex) {
-            Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex);
-            return "/noaction";
-        }
-    }
-    
     @Override
     public void onUpdateReceived(Update update) {
         
+        //ANSWER ON /SCHEDULE
+      
+        if (update.hasCallbackQuery()){
+                   
+            Chat chat = new Chat(update.getCallbackQuery().getMessage().getChatId());  
+            
+            String callBack = update.getCallbackQuery().getData();
+            Message message = update.getCallbackQuery().getMessage();
+
+            //CALL /SCHEDULE BUTTONS
+            
+            if (callBack.contains("schedule:")){
+
+                int idx = Integer.parseInt(callBack.substring(10, callBack.length()));
+
+                try {
+                     execute(SendMessage
+                        .builder()
+                        .text(chat.getDaySchedule(idx))
+                        .chatId(message.getChatId().toString())
+                        .build());
+                } catch (TelegramApiException ex) {
+                    Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
+            chat.setAction("/noaction");
+        }
+        
         if(update.hasMessage()){
             
-            Chat ch = new Chat(update.getMessage().getChatId());
-                
+            Chat chat = new Chat(update.getMessage().getChatId());  
+            
             Message message = update.getMessage();
+            
             if(message.hasText()){
                 
                 //ANSWER ON /GROUP
-                if ("/group".equals(getAction())){
+                if ("/group".equals(chat.getAction())){
+                    
                     try {
-                        ch.addGroup(message.getText());
+                        chat.setGroup(message.getText());
                         try {
                             execute(SendMessage
                                     .builder()
@@ -83,22 +107,24 @@ public class Bot extends TelegramLongPollingBot{
                             Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex1);
                         }
                     }
-                    action();
+                    chat.setAction("/noaction");
                 }
- 
+                
+ //=================================================================================================
                 if (message.hasEntities()){
-                    //CALL /SCHEDULE =================================================================
+                    
+                    //CALL /SCHEDULE
 
-                    if(Schedule.check(message.getEntities().get(0).getText(), getBotUsername())){
-                        
+                    if(chat.check(message.getEntities().get(0).getText(), getBotUsername(),"/schedule")){
+                          
                         try {
-                            Schedule.fillSchedule(Schedule.setSchedule(Jsoup.connect(ch.getGroup()).get()));
+                            chat.fillSchedule(new ArrayDay(Jsoup.connect(chat.getGroup()).get()));
                         } catch (IOException ex) {
                             Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex);
                             return;
                         }
-
-                        List<List<InlineKeyboardButton>> tmp = Schedule.getScheduleButtons();
+                        
+                        List<List<InlineKeyboardButton>> tmp = chat.getScheduleButtons();
 
                         if(tmp!= null){
                             try {
@@ -123,12 +149,12 @@ public class Bot extends TelegramLongPollingBot{
                                 Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
-                        Schedule.action();
+                        chat.setAction("/schedule");
                     }
 
-                    //CALL /GROUP =================================================================
+                    //CALL /GROUP 
 
-                    else if(Group.check(message.getEntities().get(0).getText(), getBotUsername())){
+                    else if(chat.check(message.getEntities().get(0).getText(), getBotUsername(),"/group")){
                         try {
                             execute(SendMessage
                                     .builder()
@@ -138,47 +164,19 @@ public class Bot extends TelegramLongPollingBot{
                         } catch (TelegramApiException ex) {
                             Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        Group.action();
+                        chat.setAction("/group");
                     }
                 }
             }
         }
         
-        if (update.hasCallbackQuery()){
-            String callBack = update.getCallbackQuery().getData();
-            Message message = update.getCallbackQuery().getMessage();
-                
-            //CALL /SCHEDULE BUTTON =================================================================
-            
-            if (callBack.contains("schedule:")){
-                    
-                int idx = Integer.parseInt(callBack.substring(10, callBack.length()));
-                    
-                try {
-                    execute(SendMessage
-                            .builder()
-                            .text(Schedule.getDaySchedule(idx))
-                            .chatId(message.getChatId().toString())
-                            .build());
-                } catch (TelegramApiException ex) {
-                    Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
+        
     }
     
-    public static void action() {
-        try(FileWriter f = new FileWriter("..\\..\\Data\\action.txt")){
-            f.write("/noaction");
-        } catch (IOException ex) {
-            Logger.getLogger(Schedule.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     public static void main(String[] args) throws TelegramApiException {
         Bot bot = new Bot();
         TelegramBotsApi telegramBotApi =  new TelegramBotsApi(DefaultBotSession.class);
         BotSession registerBot = telegramBotApi.registerBot(bot);
-        action();
+        
     }
 }

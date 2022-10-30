@@ -1,4 +1,4 @@
-package BotsPack;
+package Schedule;
 
 public class Lesson implements Cloneable {
     final String time;
