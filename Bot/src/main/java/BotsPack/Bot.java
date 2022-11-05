@@ -2,7 +2,6 @@ package BotsPack;
 
 import Schedule.ArrayDay;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
@@ -80,7 +79,7 @@ public class Bot extends TelegramLongPollingBot{
             Message message = update.getMessage();
             
             if(message.hasText()){
-                
+                           
                 //ANSWER ON /GROUP
                 if ("/group".equals(chat.getAction())){
                     
