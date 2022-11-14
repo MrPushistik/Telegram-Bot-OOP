@@ -44,6 +44,7 @@ public class ArrayDay {
                         case "(прак)": arrLessons.add(new Practice(time, room, name)); break;
                         case "(зач)": arrLessons.add(new Test(time, room, name)); break;
                         case "(экз)": arrLessons.add(new Exam(time, room, name)); break;
+                        case "(лаб)": arrLessons.add(new Lab(time, room, name)); break;
                     } 
 
 
