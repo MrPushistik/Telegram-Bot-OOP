@@ -36,7 +36,7 @@ public class BusyDay extends Day {
     }
     
     @Override
-    public MyCloneable clone(){
+    public BusyDay clone(){
         return new BusyDay(this);
     }
 }

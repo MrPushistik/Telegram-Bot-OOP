@@ -1,7 +1,7 @@
 package Schedule;
 
 
-public class Day implements MyCloneable{
+public class Day {
     
     final String date;
     final String dateNum;
@@ -18,7 +18,7 @@ public class Day implements MyCloneable{
     }
 
     @Override
-    public MyCloneable clone() {
+    public Day clone() {
         return this;
     }
 }
