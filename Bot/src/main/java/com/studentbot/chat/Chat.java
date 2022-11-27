@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -16,15 +17,40 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 public class Chat {
     
     final long id;
+    private String action = null;
     
-    public Chat(long id){
+    static private HashMap<Long,Chat> chats = new HashMap<>();
+    
+    public static Chat createChat(long id){
+        if (chats.containsKey(id)) {
+            System.out.println("load exist chat");
+            return chats.get(id);
+        }
+        else {
+            System.out.println("load new chat");
+            Chat tmp = new Chat(id);
+            chats.put(id, tmp);
+            return tmp;
+        }
+    }
+    
+    private Chat(long id){
         this.id = id;
         addChat();
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+    
+    public String getAction(){
+        return this.action;
     }
     
     private void addChat(){
@@ -45,7 +71,7 @@ public class Chat {
         }
     }
     
-    public void setGroup(String group) throws IOException{
+    public boolean setGroup(String group) throws IOException{
         
         Document document = Jsoup.connect("https://rasp.sstu.ru/").get();
         Elements groups = document.select(".card > .collapse > .card-body > .groups > .col > .no-gutters > .group > a");
@@ -53,16 +79,14 @@ public class Chat {
         for (Element e : groups){
             if (e.text().equals(group)){
                 String res = "https://rasp.sstu.ru" + e.attr("href");
-                System.out.println(res);
-                
                 FileWriter f = new FileWriter("..\\..\\Data\\Chats\\"+id+"\\group.txt");
                 f.write(res);
                 f.close();
-                return;
+                return true;
             }
         }
         
-        throw new IOException();
+        return false;
     }
     
     public String getGroup(){
@@ -77,30 +101,6 @@ public class Chat {
         } 
         
         return res;
-    }
-    
-    public String getAction(){
-        try(FileReader f = new FileReader("..\\..\\Data\\Chats\\"+id+"\\action.txt")){
-            Scanner sc= new Scanner(f);
-            return sc.nextLine();
-        } catch (IOException ex) {
-            Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex);
-            return "/noaction";
-        }
-    }
-    
-    public void setAction(String action) {
-        
-        File f = new File("..\\..\\Data\\Chats\\"+id+"\\action.txt");
-        
-        try (FileWriter w = new FileWriter(f)) {
-            
-            if (!f.exists()) f.createNewFile();
-            w.write(action); 
-            
-        } catch (IOException ex) {
-            Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
     
     public void fillSchedule(ArrayDay arr){
@@ -184,7 +184,8 @@ public class Chat {
         return vars;
     }
     
-    public boolean check (String happened, String botName, String expected){
+    public boolean check (Message message, String botName, String expected){
+        String happened = message.getEntities().get(0).getText();
         if (happened != null)
             return happened.equals(expected) || happened.equals(expected + botName);
         return false;

@@ -25,12 +25,12 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 public class Bot extends TelegramLongPollingBot{
     
     @Override
-    public String getBotToken(){   
-        
+    public String getBotToken(){    
         try(FileReader f = new FileReader("..\\..\\Data\\token.txt")){ 
             Scanner sc = new Scanner(f);
             return sc.nextLine();
         } catch (IOException ex) {
+            logger(ex, "Токен не считан");
             throw new RuntimeException(ex);
         }
     }
@@ -43,55 +43,54 @@ public class Bot extends TelegramLongPollingBot{
     @Override
     public void onUpdateReceived(Update update) {
         
-        //ANSWER ON /SCHEDULE
-      
         if (update.hasCallbackQuery()){
-                   
-            Chat chat = new Chat(update.getCallbackQuery().getMessage().getChatId());  
-            
-            String callBack = update.getCallbackQuery().getData();
+               
             Message message = update.getCallbackQuery().getMessage();
-
-            //CALL /SCHEDULE BUTTONS
+            Chat chat = Chat.createChat(message.getChatId());  
+            String callBack = update.getCallbackQuery().getData();
             
             if (callBack.contains("schedule:")){
                 int idx = Integer.parseInt(callBack.substring(10, callBack.length()));
                 simpleTextMeaasge(message, chat.getDaySchedule(idx), null);
             }
-            
-            chat.setAction("/noaction");
         }
         
         if(update.hasMessage()){
             
-            Chat chat = new Chat(update.getMessage().getChatId());  
-            
             Message message = update.getMessage();
+            Chat chat = Chat.createChat(message.getChatId());
             
-            if(message.hasText()){
-                      
-                //ANSWER ON /GROUP
-                if ("/group".equals(chat.getAction())){
+            if(message.hasText()){    
+                
+                if ("REPLY_GROUP".equals(chat.getAction())){
                     
-                    try {
-                        chat.setGroup(message.getText());
-                        simpleTextMeaasge(message, "Группа успешно установлена", null);
-                    } catch (IOException ex) {
-                        simpleTextMeaasge(message, "Группа не была установлена", null);
+                    chat.setAction(null);
+                    String group = message.getText();
+                    
+                    try{
+                        throw new RuntimeException();
                     }
-                    chat.setAction("/noaction");
+                    catch (RuntimeException ex){
+                        logger(ex, "Тест");
+                    }
+
+                    try {
+                        if (chat.setGroup(group))
+                            simpleTextMeaasge(message, "Группа " + group + " успешно установлена", null);
+                        else
+                            simpleTextMeaasge(message, "Группа не была установлена. Убедитесь в существовании группы " + group, null);
+                    } catch (IOException ex) {
+                        logger(ex, "Некорретная работа setGroup");
+                    }
                 }
                 
                 if (message.hasEntities()){
-                    
-                    //CALL /SCHEDULE
-                    
-                    if(chat.check(message.getEntities().get(0).getText(), getBotUsername(),"/schedule")){
+                    if(chat.check(message, getBotUsername(),"/schedule")){
                           
                         try {
                             chat.fillSchedule(new ArrayDay(Jsoup.connect(chat.getGroup()).get()));
                         } catch (IOException ex) {
-                            logger(ex);
+                            logger(ex, "Не удолость получить страницу распиания");
                             return;
                         }
                         
@@ -101,15 +100,11 @@ public class Bot extends TelegramLongPollingBot{
                             simpleTextMeaasge(message, "Выберите день", InlineKeyboardMarkup.builder().keyboard(tmp).build()); 
                         else
                             simpleTextMeaasge(message,"К сожалению, расписание отсутствует", null);
-
-                        chat.setAction("/schedule");
                     }
-
-                    //CALL /GROUP 
-
-                    else if(chat.check(message.getEntities().get(0).getText(), getBotUsername(),"/group")){
-                        simpleTextMeaasge(message,"Введите группу", null);
-                        chat.setAction("/group");
+                    else if(chat.check(message, getBotUsername(),"/group")){
+                        
+                        simpleTextMeaasge(message, "Введите группу:", null);
+                        chat.setAction("REPLY_GROUP");
                     }
                 }
             }
@@ -118,9 +113,9 @@ public class Bot extends TelegramLongPollingBot{
     
     //EXTRA FUNCTIONS
     
-    public void logger(Exception ex){
+    public void logger(Exception ex, String reason){
         try(FileWriter f = new FileWriter("..\\..\\Data\\log.txt", true)){ 
-           f.write(ex.toString());
+           f.write(reason + ":\n" + ex.toString() + "\n");
         } catch (IOException ex1) {
             Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex1);
         } 
@@ -135,7 +130,7 @@ public class Bot extends TelegramLongPollingBot{
             .replyMarkup(reply)
             .build());
         } catch (TelegramApiException ex) {
-            logger(ex);
+            logger(ex, "Cообщение '" + message.getText() + "' не было отправлено");
         }
     }
     
