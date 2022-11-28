@@ -1,6 +1,7 @@
 package com.studentbot.main;
 
 import com.studentbot.chat.Chat;
+import com.studentbot.chat.StringHolder;
 import com.studentbot.schedule.ArrayDay;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -12,9 +13,11 @@ import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -43,6 +46,8 @@ public class Bot extends TelegramLongPollingBot{
     @Override
     public void onUpdateReceived(Update update) {
         
+        System.out.println(update);
+        
         if (update.hasCallbackQuery()){
                
             Message message = update.getCallbackQuery().getMessage();
@@ -67,24 +72,20 @@ public class Bot extends TelegramLongPollingBot{
                     chat.setAction(null);
                     String group = message.getText();
                     
-                    try{
-                        throw new RuntimeException();
-                    }
-                    catch (RuntimeException ex){
-                        logger(ex, "Тест");
-                    }
-
+                    
                     try {
                         if (chat.setGroup(group))
                             simpleTextMeaasge(message, "Группа " + group + " успешно установлена", null);
                         else
                             simpleTextMeaasge(message, "Группа не была установлена. Убедитесь в существовании группы " + group, null);
                     } catch (IOException ex) {
+                        simpleTextMeaasge(message, "К сожалению, операция невозможна на данный момент", null);
                         logger(ex, "Некорретная работа setGroup");
                     }
                 }
                 
                 if (message.hasEntities()){
+                    
                     if(chat.check(message, getBotUsername(),"/schedule")){
                           
                         try {
@@ -101,10 +102,19 @@ public class Bot extends TelegramLongPollingBot{
                         else
                             simpleTextMeaasge(message,"К сожалению, расписание отсутствует", null);
                     }
-                    else if(chat.check(message, getBotUsername(),"/group")){
+                    else if (chat.check(message, getBotUsername(),"/group")){
                         
                         simpleTextMeaasge(message, "Введите группу:", null);
                         chat.setAction("REPLY_GROUP");
+                    }
+                    else if (chat.check(message, getBotUsername(),"/n")){
+                        StringHolder h = new StringHolder();
+                        simpleTextMeaasge(message, message.getFrom().getFirstName() + h.getText(), null);
+                        chat.addToNList(message.getFrom());
+                    }
+                    else if (chat.check(message, getBotUsername(),"/getn")){
+                        simpleTextMeaasge(message, chat.getNList(), null);
+                        //добавить очистку спсика 
                     }
                 }
             }

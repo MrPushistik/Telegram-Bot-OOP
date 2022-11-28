@@ -6,6 +6,7 @@ import com.studentbot.schedule.ArrayDay;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 public class Chat {
@@ -29,11 +31,9 @@ public class Chat {
     
     public static Chat createChat(long id){
         if (chats.containsKey(id)) {
-            System.out.println("load exist chat");
             return chats.get(id);
         }
         else {
-            System.out.println("load new chat");
             Chat tmp = new Chat(id);
             chats.put(id, tmp);
             return tmp;
@@ -182,6 +182,54 @@ public class Chat {
         }
        
         return vars;
+    }
+    
+    public void addToNList(User user){
+        
+        File dir = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery\\"+user.getId());
+        if (!dir.exists()) dir.mkdirs();
+        
+        File file = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery\\"+user.getId()+"\\firstname.txt");
+            
+        try {
+            file.createNewFile();
+        } catch (IOException ex) {
+            Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
+        }
+              
+        try (FileWriter wr = new FileWriter(file)){   
+            wr.write(user.getFirstName());
+        } catch (IOException ex) {
+            Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public String getNList(){
+        
+        File usersDir = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery");
+        if (!usersDir.exists()) return "Никто не просил о пощаде";
+        
+        File[] userDir = usersDir.listFiles();
+
+        String res = "Кого спасти:\n";
+        int i = 0;
+        for (File file : userDir){
+            
+            File [] userName = file.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                   return "firstname.txt".equals(name);
+                }
+            });
+            
+            try(Scanner sc = new Scanner(userName[0])){
+                res += ++i + ") "+ sc.nextLine() + "\n";
+            } catch (IOException ex) {
+                Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
+            } 
+        }
+        
+        return res;
     }
     
     public boolean check (Message message, String botName, String expected){
