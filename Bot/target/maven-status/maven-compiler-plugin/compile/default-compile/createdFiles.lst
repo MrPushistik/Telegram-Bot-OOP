@@ -8,4 +8,5 @@ com\studentbot\schedule\lessons\Exam.class
 com\studentbot\schedule\lessons\Practice.class
 com\studentbot\schedule\lessons\Lab.class
 com\studentbot\chat\Chat.class
+com\studentbot\main\StringHolder.class
 com\studentbot\schedule\lessons\Lection.class

@@ -29,7 +29,7 @@ public class StringHolder {
         try(Scanner sc = new Scanner(f)){
             while(sc.hasNextLine()) msgs.add(" " + sc.nextLine());
         }catch (IOException ex) {
-            Logger.getLogger(StringHolder.class.getName()).log(Level.SEVERE, null, ex);
+            MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\messages.txt");
         }
     }
     

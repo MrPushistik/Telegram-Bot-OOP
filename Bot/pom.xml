@@ -24,5 +24,17 @@
             <artifactId>jsoup</artifactId>
             <version>1.15.3</version>
          </dependency>
+        <dependency>
+            <groupId>it.fabioformosa.quartz-manager</groupId>
+            <artifactId>quartz-manager-parent</artifactId>
+            <version>3.1.0</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>com.quartzdesk</groupId>
+            <artifactId>quartzdesk-agent</artifactId>
+            <version>4.0.12</version>
+            <type>pom.sha512</type>
+        </dependency>
     </dependencies>
 </project>

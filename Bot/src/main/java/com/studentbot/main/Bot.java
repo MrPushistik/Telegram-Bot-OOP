@@ -3,13 +3,15 @@ package com.studentbot.main;
 import com.studentbot.chat.Chat;
 import com.studentbot.schedule.ArrayDay;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.jsoup.Jsoup;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -33,7 +35,7 @@ public class Bot extends TelegramLongPollingBot{
         try(Scanner sc = new Scanner(f)){ 
             return sc.nextLine();
         } catch (IOException ex) {
-            logger(ex, "Токен не считан");
+            MyLogger.logger(ex, "Токен не считан");
             throw new RuntimeException(ex);
         }
     }
@@ -56,6 +58,18 @@ public class Bot extends TelegramLongPollingBot{
                 int idx = Integer.parseInt(callBack.substring(10, callBack.length()));
                 simpleTextMeaasge(message, chat.getDaySchedule(idx), null);
             }
+            else if (callBack.contains("clear NList")){
+                
+                File dir = new File("..\\..\\Data\\Chats\\" + chat.id + "\\UsersQuery");
+                
+                if (dir.exists()){
+                    File [] files = dir.listFiles();
+                    if (files != null) for (File file : files) file.delete();
+                    dir.delete();
+                } 
+                
+                simpleTextMeaasge(message, "Список очищен", null);
+            }
         }
         
         if(update.hasMessage()){
@@ -77,7 +91,7 @@ public class Bot extends TelegramLongPollingBot{
                             simpleTextMeaasge(message, "Группа не была установлена. Убедитесь в существовании группы " + group, null);
                     } catch (IOException ex) {
                         simpleTextMeaasge(message, "К сожалению, операция невозможна на данный момент", null);
-                        logger(ex, "Некорретная работа setGroup");
+                        MyLogger.logger(ex, "Некорретная работа setGroup");
                     }
                 }
                 
@@ -88,7 +102,7 @@ public class Bot extends TelegramLongPollingBot{
                         try {
                             chat.fillSchedule(new ArrayDay(Jsoup.connect(chat.getGroup()).get()));
                         } catch (IOException ex) {
-                            logger(ex, "Не удолость получить страницу распиания");
+                            MyLogger.logger(ex, "Не удолость получить страницу распиания");
                             return;
                         }
                         
@@ -110,8 +124,11 @@ public class Bot extends TelegramLongPollingBot{
                         chat.addToNList(message.getFrom());
                     }
                     else if (check(message, getBotUsername(),"/getn")){
-                        simpleTextMeaasge(message, chat.getNList(), null);
-                        //добавить очистку спсика 
+                        String tmp = chat.getNList();
+                        if (tmp == null)
+                            simpleTextMeaasge(message, "Список пуст", null);
+                        else
+                            simpleTextMeaasge(message, chat.getNList(), InlineKeyboardMarkup.builder().keyboard(chat.getClearNListButton()).build()); 
                     }
                 }
             }
@@ -119,14 +136,6 @@ public class Bot extends TelegramLongPollingBot{
     }
     
     //EXTRA FUNCTIONS
-    
-    public void logger(Exception ex, String reason){
-        try(FileWriter f = new FileWriter("..\\..\\Data\\log.txt", true)){ 
-           f.write(reason + ":\n" + ex.toString() + "\n");
-        } catch (IOException ex1) {
-            Logger.getLogger(Bot.class.getName()).log(Level.SEVERE, null, ex1);
-        } 
-    }
     
     public void simpleTextMeaasge(Message message, String txt, ReplyKeyboard reply){
         try {
@@ -137,7 +146,7 @@ public class Bot extends TelegramLongPollingBot{
             .replyMarkup(reply)
             .build());
         } catch (TelegramApiException ex) {
-            logger(ex, "Cообщение '" + message.getText() + "' не было отправлено");
+            MyLogger.logger(ex, "Cообщение '" + message.getText() + "' не было отправлено");
         }
     }
     
