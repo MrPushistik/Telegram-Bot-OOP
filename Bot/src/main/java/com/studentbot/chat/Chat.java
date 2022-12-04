@@ -1,6 +1,5 @@
 package com.studentbot.chat;
 
-import com.studentbot.main.Bot;
 import com.studentbot.schedule.Day;
 import com.studentbot.schedule.ArrayDay;
 import java.io.File;
@@ -29,7 +28,7 @@ public class Chat {
     
     static private HashMap<Long,Chat> chats = new HashMap<>();
     
-    public static Chat createChat(long id){
+    public static Chat getChat(long id){
         if (chats.containsKey(id)) {
             return chats.get(id);
         }
@@ -54,34 +53,36 @@ public class Chat {
     }
     
     private void addChat(){
-        File dir = new File("..\\..\\Data\\Chats\\"+id);
+        
+        File dir = new File("..\\..\\Data\\Chats\\"+this.id);
         if (dir.exists()) return;
         
         dir.mkdirs(); 
-        File f = new File("..\\..\\Data\\Chats\\"+id+"\\group.txt");
-        try {
+        
+        File f = new File("..\\..\\Data\\Chats\\"+this.id+"\\group.txt");
+        
+        try (FileWriter wf = new FileWriter(f)){
             f.createNewFile();
-            try(FileWriter w = new FileWriter(f)){
-                w.write("https://rasp.sstu.ru/rasp/group/135");
-            }catch (IOException ex) {
-            Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            wf.write("https://rasp.sstu.ru/rasp/group/135");
         } catch (IOException ex) {
             Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    public boolean setGroup(String group) throws IOException{
+    public boolean setGroup(String group) throws IOException {
         
         Document document = Jsoup.connect("https://rasp.sstu.ru/").get();
         Elements groups = document.select(".card > .collapse > .card-body > .groups > .col > .no-gutters > .group > a");
         
         for (Element e : groups){
             if (e.text().equals(group)){
+                
                 String res = "https://rasp.sstu.ru" + e.attr("href");
-                FileWriter f = new FileWriter("..\\..\\Data\\Chats\\"+id+"\\group.txt");
-                f.write(res);
-                f.close();
+                
+                try (FileWriter f = new FileWriter("..\\..\\Data\\Chats\\"+this.id+"\\group.txt")) {
+                    f.write(res);
+                }
+                
                 return true;
             }
         }
@@ -93,8 +94,9 @@ public class Chat {
         
         String res = null;
         
-        try (FileReader f = new FileReader("..\\..\\Data\\Chats\\"+id+"\\group.txt")) {
-            Scanner sc = new Scanner(f);
+        File f = new File("..\\..\\Data\\Chats\\"+this.id+"\\group.txt");
+        
+        try (Scanner sc = new Scanner(f);) {
             res = sc.nextLine();
         } catch (IOException ex) {
             Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
@@ -107,19 +109,21 @@ public class Chat {
         
         List<Day> days = arr.getDays();
         
-        File dir = new File("..\\..\\Data\\Chats\\"+id+"\\Schedule");
+        File dir = new File("..\\..\\Data\\Chats\\"+this.id+"\\Schedule");
+        
         if (dir.exists()) {
             File[] contents = dir.listFiles();
             if (contents != null) for (File f : contents) f.delete();
             dir.delete();
         }
+        
         dir.mkdirs();
      
         for (int i = 0; i <= 5; i++){
             
             Day d = days.get(arr.getCurrDay() + i);
             
-            File f = new File("..\\..\\Data\\Chats\\"+id+"\\Schedule\\"+i+".txt");
+            File f = new File("..\\..\\Data\\Chats\\"+this.id+"\\Schedule\\"+i+".txt");
             
             try (FileWriter wf = new FileWriter(f)) {
                 f.createNewFile();
@@ -134,15 +138,10 @@ public class Chat {
 
         String res = "";
         
-        try (FileReader daySchedule = new FileReader("..\\..\\Data\\Chats\\"+id+"\\Schedule\\"+i+".txt")){
-
-            Scanner sc = new Scanner(daySchedule);
-
-            while(true){
-                if(sc.hasNextLine()) res += sc.nextLine() + "\n";
-                else break;  
-            }
-             
+        File f = new File("..\\..\\Data\\Chats\\"+this.id+"\\Schedule\\"+i+".txt");
+        
+        try (Scanner sc = new Scanner(f);){
+            while(sc.hasNextLine())res += sc.nextLine() + "\n";
         } catch (IOException ex) {
             Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -154,17 +153,17 @@ public class Chat {
         
         List<List<InlineKeyboardButton>> vars = new ArrayList<>();
         
-        File dir = new File("..\\..\\Data\\Chats\\"+id+"\\Schedule");
-        File[] files = null;
-        if (dir.exists())  files = dir.listFiles();
+        File dir = new File("..\\..\\Data\\Chats\\"+this.id+"\\Schedule");
+        File[] files;
+        
+        if (dir.exists()) files = dir.listFiles();
         else return null;
         
         for (File file : files) {
             
             String name = "День";
             
-            try (FileReader rf = new FileReader(file)){
-                Scanner sc = new Scanner(rf);
+            try (Scanner sc = new Scanner(file);){
                 name = sc.nextLine();  
                 name = name.substring(4, name.length()-4);
             } catch (IOException ex) {
@@ -173,8 +172,7 @@ public class Chat {
 
             vars.add(new ArrayList<>());
             
-            vars.get(vars.size()-1).add(
-                    InlineKeyboardButton
+            vars.get(vars.size()-1).add(InlineKeyboardButton
                             .builder()
                             .text(name)
                             .callbackData("schedule: " + file.getName().substring(0, 1))
@@ -186,10 +184,11 @@ public class Chat {
     
     public void addToNList(User user){
         
-        File dir = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery\\"+user.getId());
+        File dir = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery");
+        
         if (!dir.exists()) dir.mkdirs();
         
-        File file = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery\\"+user.getId()+"\\firstname.txt");
+        File file = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery\\"+user.getId()+".txt");
             
         try {
             file.createNewFile();
@@ -207,20 +206,17 @@ public class Chat {
     public String getNList(){
         
         File usersDir = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery");
-        if (!usersDir.exists()) return "Никто не просил о пощаде";
+        if (!usersDir.exists()) return "Список пуст";
         
         File[] userDir = usersDir.listFiles();
 
-        String res = "Кого спасти:\n";
+        String res = "Просили не отмечать:\n";
         int i = 0;
+        
         for (File file : userDir){
             
-            File [] userName = file.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                   return "firstname.txt".equals(name);
-                }
-            });
+            File [] userName = 
+                file.listFiles((File dir, String name) -> "firstname.txt".equals(name));
             
             try(Scanner sc = new Scanner(userName[0])){
                 res += ++i + ") "+ sc.nextLine() + "\n";
@@ -233,9 +229,12 @@ public class Chat {
     }
     
     public boolean check (Message message, String botName, String expected){
+        
         String happened = message.getEntities().get(0).getText();
+        
         if (happened != null)
             return happened.equals(expected) || happened.equals(expected + botName);
+        
         return false;
     }
 }

@@ -1,11 +1,6 @@
 package com.studentbot.schedule;
 
 import com.studentbot.schedule.lessons.Lesson;
-import com.studentbot.schedule.lessons.Exam;
-import com.studentbot.schedule.lessons.Practice;
-import com.studentbot.schedule.lessons.Test;
-import com.studentbot.schedule.lessons.Lection;
-import com.studentbot.schedule.lessons.Lab;
 import java.util.ArrayList;
 import java.util.List;
 import org.jsoup.nodes.Document;
@@ -30,7 +25,7 @@ public class ArrayDay {
             Elements lessonsNode = dayNode.select(".day-lesson > div");
   
             String tmp = dayNode.selectFirst(".day-header > div").text();
-            
+
             if (lessonsNode.isEmpty()){
                 this.days.add(new Day(tmp.substring(0, tmp.length()-5),tmp.substring(tmp.length()-5, tmp.length())));
             }
@@ -52,7 +47,7 @@ public class ArrayDay {
 
     public List<Day> getDays(){
         List<Day> copy = new ArrayList<>();
-        for (Day d : this.days) copy.add((Day)d.clone());
+        for (Day d : this.days) copy.add(d.clone());
         return copy;
     }
     

@@ -1,8 +1,8 @@
 package com.studentbot.main;
 
 import com.studentbot.chat.Chat;
-import com.studentbot.chat.StringHolder;
 import com.studentbot.schedule.ArrayDay;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,11 +13,9 @@ import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -28,9 +26,11 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 public class Bot extends TelegramLongPollingBot{
     
     @Override
-    public String getBotToken(){    
-        try(FileReader f = new FileReader("..\\..\\Data\\token.txt")){ 
-            Scanner sc = new Scanner(f);
+    public String getBotToken(){  
+        
+        File f = new File("..\\..\\Data\\token.txt");
+        
+        try(Scanner sc = new Scanner(f)){ 
             return sc.nextLine();
         } catch (IOException ex) {
             logger(ex, "Токен не считан");
@@ -49,7 +49,7 @@ public class Bot extends TelegramLongPollingBot{
         if (update.hasCallbackQuery()){
                
             Message message = update.getCallbackQuery().getMessage();
-            Chat chat = Chat.createChat(message.getChatId());  
+            Chat chat = Chat.getChat(message.getChatId());  
             String callBack = update.getCallbackQuery().getData();
             
             if (callBack.contains("schedule:")){
@@ -61,7 +61,7 @@ public class Bot extends TelegramLongPollingBot{
         if(update.hasMessage()){
             
             Message message = update.getMessage();
-            Chat chat = Chat.createChat(message.getChatId());
+            Chat chat = Chat.getChat(message.getChatId());
             
             if(message.hasText()){    
                 
@@ -69,7 +69,6 @@ public class Bot extends TelegramLongPollingBot{
                     
                     chat.setAction(null);
                     String group = message.getText();
-                    
                     
                     try {
                         if (chat.setGroup(group))
@@ -106,8 +105,8 @@ public class Bot extends TelegramLongPollingBot{
                         chat.setAction("REPLY_GROUP");
                     }
                     else if (chat.check(message, getBotUsername(),"/n")){
-                        StringHolder h = new StringHolder();
-                        simpleTextMeaasge(message, message.getFrom().getFirstName() + h.getText(), null);
+                        StringHolder h = StringHolder.getStringHolder();
+                        simpleTextMeaasge(message, message.getFrom().getFirstName() + h.getString(), null);
                         chat.addToNList(message.getFrom());
                     }
                     else if (chat.check(message, getBotUsername(),"/getn")){

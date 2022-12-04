@@ -10,16 +10,12 @@ public class BusyDay extends Day {
     
     BusyDay(String date, String dateNum, List<Lesson> lessons){
         super(date, dateNum);
-        setLessons(lessons);
+        this.lessons = new ArrayList<>();
+        for (Lesson l : lessons) this.lessons.add(l);
     }
     
     BusyDay(BusyDay day){
         this(day.date, day.dateNum, day.lessons);
-    }
-    
-    private void setLessons(List<Lesson> lessons){
-        this.lessons = new ArrayList<>();
-        for (Lesson l : lessons) this.lessons.add(l);
     }
     
     public List<Lesson> getLessons(){
