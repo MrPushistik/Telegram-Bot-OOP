@@ -227,16 +227,6 @@ public class Chat {
         
         return res;
     }
-    
-    public boolean check (Message message, String botName, String expected){
-        
-        String happened = message.getEntities().get(0).getText();
-        
-        if (happened != null)
-            return happened.equals(expected) || happened.equals(expected + botName);
-        
-        return false;
-    }
 }
         
 

@@ -83,7 +83,7 @@ public class Bot extends TelegramLongPollingBot{
                 
                 if (message.hasEntities()){
                     
-                    if(chat.check(message, getBotUsername(),"/schedule")){
+                    if(check(message, getBotUsername(),"/schedule")){
                           
                         try {
                             chat.fillSchedule(new ArrayDay(Jsoup.connect(chat.getGroup()).get()));
@@ -99,17 +99,17 @@ public class Bot extends TelegramLongPollingBot{
                         else
                             simpleTextMeaasge(message,"К сожалению, расписание отсутствует", null);
                     }
-                    else if (chat.check(message, getBotUsername(),"/group")){
+                    else if (check(message, getBotUsername(),"/group")){
                         
                         simpleTextMeaasge(message, "Введите группу:", null);
                         chat.setAction("REPLY_GROUP");
                     }
-                    else if (chat.check(message, getBotUsername(),"/n")){
+                    else if (check(message, getBotUsername(),"/n")){
                         StringHolder h = StringHolder.getStringHolder();
                         simpleTextMeaasge(message, message.getFrom().getFirstName() + h.getString(), null);
                         chat.addToNList(message.getFrom());
                     }
-                    else if (chat.check(message, getBotUsername(),"/getn")){
+                    else if (check(message, getBotUsername(),"/getn")){
                         simpleTextMeaasge(message, chat.getNList(), null);
                         //добавить очистку спсика 
                     }
@@ -139,6 +139,16 @@ public class Bot extends TelegramLongPollingBot{
         } catch (TelegramApiException ex) {
             logger(ex, "Cообщение '" + message.getText() + "' не было отправлено");
         }
+    }
+    
+    public boolean check (Message message, String botName, String expected){
+        
+        String happened = message.getEntities().get(0).getText();
+        
+        if (happened != null)
+            return happened.equals(expected) || happened.equals(expected + botName);
+        
+        return false;
     }
     
     public static void main(String[] args) throws TelegramApiException {
