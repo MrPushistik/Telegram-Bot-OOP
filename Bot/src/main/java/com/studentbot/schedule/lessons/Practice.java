@@ -8,7 +8,7 @@ public class Practice extends Lesson{
     
     @Override
     public String toString() {
-        return "[" + super.toString() + " (Практика)]";
-    }
-    
+        String res = super.toString();
+        return  res.substring(0, res.length()) + " (Практика)]";
+    }  
 }

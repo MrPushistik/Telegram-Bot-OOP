@@ -6,8 +6,10 @@ public class Lab extends Lesson{
         super(time, room, subj);
     }
 
+
     @Override
     public String toString() {
-        return "[" + super.toString() + " (Лабораторная работа)]";
+        String res = super.toString();
+        return  res.substring(0, res.length()) + " (Лабораторная работа)]";
     }
 }

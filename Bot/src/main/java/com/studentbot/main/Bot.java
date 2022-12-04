@@ -46,8 +46,6 @@ public class Bot extends TelegramLongPollingBot{
     @Override
     public void onUpdateReceived(Update update) {
         
-        System.out.println(update);
-        
         if (update.hasCallbackQuery()){
                
             Message message = update.getCallbackQuery().getMessage();
@@ -96,7 +94,7 @@ public class Bot extends TelegramLongPollingBot{
                         }
                         
                         List<List<InlineKeyboardButton>> tmp = chat.getScheduleButtons();
-
+                        
                         if(tmp!= null)
                             simpleTextMeaasge(message, "Выберите день", InlineKeyboardMarkup.builder().keyboard(tmp).build()); 
                         else

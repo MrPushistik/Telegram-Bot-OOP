@@ -40,19 +40,9 @@ public class ArrayDay {
                     String time = lessonNode.select(".lesson-hour").text();
                     String room = lessonNode.select(".lesson-room").text();
                     String name = lessonNode.select(".lesson-name").text();
-
-
                     String type = lessonNode.select(".lesson-type").text();
-
-                    switch(type){
-                        case "(лекц)": arrLessons.add(new Lection(time, room, name)); break;
-                        case "(прак)": arrLessons.add(new Practice(time, room, name)); break;
-                        case "(зач)": arrLessons.add(new Test(time, room, name)); break;
-                        case "(экз)": arrLessons.add(new Exam(time, room, name)); break;
-                        case "(лаб)": arrLessons.add(new Lab(time, room, name)); break;
-                    } 
-
-
+                    
+                    arrLessons.add(Lesson.getLesson(type, time, room, name));
                 } 
 
                 this.days.add(new BusyDay(tmp.substring(0, tmp.length()-5),tmp.substring(tmp.length()-5, tmp.length()),arrLessons));

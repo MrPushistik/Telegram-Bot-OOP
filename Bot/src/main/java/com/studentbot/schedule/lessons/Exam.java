@@ -6,8 +6,9 @@ public class Exam extends Lesson{
         super(time, room, subj);
     }
     
-     @Override
+    @Override
     public String toString() {
-        return "[" + super.toString() + " (Экзамен)]";
+        String res = super.toString();
+        return  res.substring(0, res.length()) + " (Экзамен)]";
     }
 }

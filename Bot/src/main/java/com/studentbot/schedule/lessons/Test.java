@@ -8,7 +8,7 @@ public class Test extends Lesson{
     
     @Override
     public String toString() {
-        return "[" + super.toString() + " (Зачет)]";
-    }
-    
+        String res = super.toString();
+        return  res.substring(0, res.length()) + " (Зачет)]";
+    } 
 }

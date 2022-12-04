@@ -8,6 +8,7 @@ public class Lection extends Lesson{
 
     @Override
     public String toString() {
-        return "[" + super.toString() + " (Лекция)]";
+        String res = super.toString();
+        return  res.substring(0, res.length()) + " (Лекция)]";
     }
 }
