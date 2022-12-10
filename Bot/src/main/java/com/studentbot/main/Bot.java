@@ -70,6 +70,15 @@ public class Bot extends TelegramLongPollingBot{
                 
                 simpleTextMeaasge(message, "Список очищен", null);
             }
+            else if (callBack.contains("try /group")){
+                simpleTextMeaasge(message, "Введите группу:", null);
+                chat.setAction("REPLY_GROUP");
+            }
+            else if (callBack.contains("try /random")){
+                simpleTextMeaasge(message, "Введите кол-во вариантов", null);
+                chat.setAction("REPLY_RANDOM");
+            }
+            
         }
         
         if(update.hasMessage()){
@@ -77,23 +86,50 @@ public class Bot extends TelegramLongPollingBot{
             Message message = update.getMessage();
             Chat chat = Chat.getChat(message.getChatId());
             
+            
             if(message.hasText()){    
                 
                 if ("REPLY_GROUP".equals(chat.getAction())){
                     
-                    chat.setAction(null);
                     String group = message.getText();
                     
                     try {
                         if (chat.setGroup(group))
                             simpleTextMeaasge(message, "Группа " + group + " успешно установлена", null);
                         else
-                            simpleTextMeaasge(message, "Группа не была установлена. Убедитесь в существовании группы " + group, null);
+                            simpleTextMeaasge(message, "Группа не была установлена. Убедитесь в существовании группы " + group, InlineKeyboardMarkup.builder().keyboard(chat.getGroupButton()).build());
                     } catch (IOException ex) {
                         simpleTextMeaasge(message, "К сожалению, операция невозможна на данный момент", null);
                         MyLogger.logger(ex, "Некорретная работа setGroup");
                     }
                 }
+                else if ("REPLY_RANDOM".equals(chat.getAction())){
+
+                    String numberStr = message.getText();
+                    
+                    try{
+                        int i = Integer.parseInt(numberStr);
+                        if (i <= 1) throw new IllegalArgumentException();
+                        int res = (int) (Math.random()*i) + 1;
+                        simpleTextMeaasge(message, ("Результат: " + res), null);
+                    }
+                    catch(NumberFormatException ex){
+                        simpleTextMeaasge(message, "Введено не число", InlineKeyboardMarkup.builder().keyboard(chat.getRandomButton()).build());
+                    }
+                    catch(IllegalArgumentException ex){
+                        simpleTextMeaasge(message, "Кол-во вариантов должно быть не менее 2", InlineKeyboardMarkup.builder().keyboard(chat.getRandomButton()).build());
+                    }
+                }
+                else if ("REPLY_SPAM".equals(chat.getAction())){
+                    for (int i = 0; i < 4; i++){
+                       simpleTextMeaasge(message, message.getText(), null); 
+                    }
+                }
+                else if ("REPLY_С".equals(chat.getAction())){
+                    chat.addToСList(message.getText()); 
+                }
+                
+                chat.setAction(null);
                 
                 if (message.hasEntities()){
                     
@@ -113,8 +149,7 @@ public class Bot extends TelegramLongPollingBot{
                         else
                             simpleTextMeaasge(message,"К сожалению, расписание отсутствует", null);
                     }
-                    else if (check(message, getBotUsername(),"/group")){
-                        
+                    else if (check(message, getBotUsername(),"/group")){             
                         simpleTextMeaasge(message, "Введите группу:", null);
                         chat.setAction("REPLY_GROUP");
                     }
@@ -123,12 +158,37 @@ public class Bot extends TelegramLongPollingBot{
                         simpleTextMeaasge(message, message.getFrom().getFirstName() + h.getString(), null);
                         chat.addToNList(message.getFrom());
                     }
-                    else if (check(message, getBotUsername(),"/getn")){
+                    else if (check(message, getBotUsername(),"/getnlist")){
                         String tmp = chat.getNList();
                         if (tmp == null)
                             simpleTextMeaasge(message, "Список пуст", null);
                         else
                             simpleTextMeaasge(message, chat.getNList(), InlineKeyboardMarkup.builder().keyboard(chat.getClearNListButton()).build()); 
+                    }
+                    else if (check(message, getBotUsername(),"/pushon")){
+                        
+                    }
+                    else if (check(message, getBotUsername(),"/pushoff")){
+                        
+                    }
+                    else if (check(message, getBotUsername(),"/spam")){
+                        simpleTextMeaasge(message, "Введите сообщение", null);
+                        chat.setAction("REPLY_SPAM");
+                    }
+                    else if (check(message, getBotUsername(),"/random")){
+                        simpleTextMeaasge(message, "Введите кол-во вариантов", null);
+                        chat.setAction("REPLY_RANDOM");
+                    }
+                    else if (check(message, getBotUsername(),"/c")){
+                        simpleTextMeaasge(message, "Введите цитату", null);
+                        chat.setAction("REPLY_С");
+                    }
+                    else if (check(message, getBotUsername(),"/getc")){
+                        simpleTextMeaasge(message, chat.getC(), null);
+                    }
+                    else if (check(message, getBotUsername(),"/clearc")){
+                        chat.clearCList();
+                        simpleTextMeaasge(message, "Циатник очищен", null);
                     }
                 }
             }

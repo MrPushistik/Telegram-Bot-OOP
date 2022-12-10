@@ -14,9 +14,11 @@ public class ArrayDay {
 
     public ArrayDay(Document document){
         
-        Elements daysNode = document.select(".day:not(.day-color-red):not(.day-color-blue)");
+        Elements daysNode = document.select(".day");
             
         for (int i = 0; i < daysNode.size(); i++){
+            
+            if (i%7==0) continue;
 
             Element dayNode = daysNode.get(i);
             if (dayNode.hasClass("day-current")) this.currDay = i;
@@ -25,7 +27,7 @@ public class ArrayDay {
             Elements lessonsNode = dayNode.select(".day-lesson > div");
   
             String tmp = dayNode.selectFirst(".day-header > div").text();
-
+            
             if (lessonsNode.isEmpty()){
                 this.days.add(new Day(tmp.substring(0, tmp.length()-5),tmp.substring(tmp.length()-5, tmp.length())));
             }
