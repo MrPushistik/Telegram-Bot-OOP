@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,14 +19,14 @@ import org.jsoup.select.Elements;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-public class Chat {
+public class MyChat {
     
     public final long id;
     private String action = null;
     
-    static private HashMap<Long,Chat> chats = new HashMap<>();
+    static private HashMap<Long,MyChat> chats = new HashMap<>();
     
-    public static Chat getChat(long id){
+    public static MyChat getChat(long id){
         
         addChat(id);
         
@@ -32,7 +34,7 @@ public class Chat {
             return chats.get(id);
         }
         else {
-            Chat tmp = new Chat(id);
+            MyChat tmp = new MyChat(id);
             chats.put(id, tmp);
             return tmp;
         }
@@ -53,9 +55,18 @@ public class Chat {
         } catch (IOException ex) {
             MyLogger.logger(ex, "Не удалось создать файл/записать в файл ..\\Data\\Chats\\"+id+"group.txt");
         }
+        
+        File f2 = new File("..\\..\\Data\\Chats\\"+id+"\\push.txt");
+        
+        try (FileWriter wf2 = new FileWriter(f2)){
+            f2.createNewFile();
+            wf2.write("off");
+        } catch (IOException ex) {
+            MyLogger.logger(ex, "Не удалось создать файл/записать в файл ..\\Data\\Chats\\"+id+"push.txt");
+        }
     }
     
-    private Chat(long id){
+    private MyChat(long id){
         this.id = id;
     }
 
@@ -307,6 +318,17 @@ public class Chat {
         for (File file : users)file.delete();
 
         userDir.delete();
+    }
+    
+    public void push(String state){
+        File f = new File("..\\..\\Data\\Chats\\"+this.id+"\\push.txt");
+        
+        try(FileWriter wf = new FileWriter(f)){
+            if (!f.exists()) f.createNewFile();
+            wf.write(state);
+        } catch (IOException ex) {
+            MyLogger.logger(ex, "Не удалось внести данные в ..\\..\\Data\\Chats\\"+this.id+"\\push.txt");
+        }
     }
 }
         

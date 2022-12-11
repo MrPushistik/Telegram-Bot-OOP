@@ -1,12 +1,14 @@
 com\studentbot\schedule\lessons\Test.class
 com\studentbot\schedule\BusyDay.class
+com\studentbot\main\Bot$1.class
+com\studentbot\schedule\Day.class
+com\studentbot\schedule\lessons\Exam.class
+com\studentbot\schedule\lessons\Lection.class
 com\studentbot\main\Bot.class
 com\studentbot\schedule\lessons\Lesson.class
-com\studentbot\schedule\Day.class
 com\studentbot\schedule\ArrayDay.class
-com\studentbot\schedule\lessons\Exam.class
 com\studentbot\schedule\lessons\Practice.class
 com\studentbot\schedule\lessons\Lab.class
 com\studentbot\chat\Chat.class
+com\studentbot\main\MyLogger.class
 com\studentbot\main\StringHolder.class
-com\studentbot\schedule\lessons\Lection.class
