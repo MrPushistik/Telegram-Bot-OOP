@@ -86,6 +86,11 @@ public class Bot extends TelegramLongPollingBot{
                 simpleTextMeaasge(message, "Введите кол-во вариантов", null);
                 chat.setAction("REPLY_RANDOM");
             }
+            else if (callBack.contains("try /remind")){
+                simpleTextMeaasge(message, "Введите дату, когда напомнить в формате 21.12.2012-00:00", null);
+                chat.setAction("REPLY_REMIND_TIME");
+            }
+           
             
         }
         
@@ -201,6 +206,10 @@ public class Bot extends TelegramLongPollingBot{
                         chat.clearCList();
                         simpleTextMeaasge(message, "Циатник очищен", null);
                     }
+                    else if (check(message, getBotUsername(),"/removelastc")){
+                        chat.removeLastC();
+                        simpleTextMeaasge(message, "Последняя цитата удалена", null);
+                    }   
                 }
             }
         }

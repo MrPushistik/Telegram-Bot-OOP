@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
@@ -291,7 +293,7 @@ public class MyChat {
             MyLogger.logger(ex, "Не удалось создать файл/записать в файл ..\\Data\\Chats\\"+this.id+"\\C\\" + i + ".txt");
         }
     }
-    
+      
     public String getC(){
         
         File userDir = new File("..\\..\\Data\\Chats\\"+this.id+"\\C");
@@ -318,6 +320,17 @@ public class MyChat {
         for (File file : users)file.delete();
 
         userDir.delete();
+    }
+    
+    public void removeLastC(){
+        
+        File userDir = new File("..\\..\\Data\\Chats\\"+this.id+"\\C");
+        if (!userDir.exists()) return;
+        
+        File[] users = userDir.listFiles();
+        users[users.length - 1].delete();
+        
+        if (users.length == 1) userDir.delete();
     }
     
     public void push(String state){
