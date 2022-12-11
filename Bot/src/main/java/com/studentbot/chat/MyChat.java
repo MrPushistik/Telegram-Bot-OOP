@@ -276,6 +276,16 @@ public class MyChat {
         return res;
     }
     
+    public void clearNList(){
+        File dir = new File("..\\..\\Data\\Chats\\" + this.id + "\\UsersQuery");
+                
+        if (dir.exists()){
+            File [] files = dir.listFiles();
+            if (files != null) for (File file : files) file.delete();
+            dir.delete();
+        }          
+    }
+    
     public void addToСList(String c){
         
         File dir = new File("..\\..\\Data\\Chats\\"+this.id+"\\C");
