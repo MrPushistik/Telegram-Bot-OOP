@@ -7,13 +7,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -24,6 +20,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 public class MyChat {
     
     public final long id;
+    public final MyGroup mygroup = new MyGroup();
+    public final Schedule schedule = new Schedule();
+    public final Buttons buttons = new Buttons();
+    public final NList nList = new NList();
+    public final CList cList = new CList();
     private String action = null;
     
     static private HashMap<Long,MyChat> chats = new HashMap<>();
@@ -40,6 +41,18 @@ public class MyChat {
             chats.put(id, tmp);
             return tmp;
         }
+    }
+    
+    private MyChat(long id){
+        this.id = id;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+    
+    public String getAction(){
+        return this.action;
     }
     
     private static void addChat(long id){
@@ -68,281 +81,6 @@ public class MyChat {
         }
     }
     
-    private MyChat(long id){
-        this.id = id;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
-    }
-    
-    public String getAction(){
-        return this.action;
-    }
-    
-    public boolean setGroup(String group) throws IOException {
-        
-        Document document = Jsoup.connect("https://rasp.sstu.ru/").get();
-        Elements groups = document.select(".card > .collapse > .card-body > .groups > .col > .no-gutters > .group > a");
-        
-        for (Element e : groups){
-            if (e.text().equals(group)){
-                
-                String res = "https://rasp.sstu.ru" + e.attr("href");
-                
-                try (FileWriter f = new FileWriter("..\\..\\Data\\Chats\\"+this.id+"\\group.txt")) {
-                    f.write(res);
-                }
-                
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    public String getGroup(){
-        
-        String res = null;
-        
-        File f = new File("..\\..\\Data\\Chats\\"+this.id+"\\group.txt");
-        
-        try (Scanner sc = new Scanner(f);) {
-            res = sc.nextLine();
-        } catch (IOException ex) {
-            MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\Chats\\"+this.id+"\\group.txt");
-        } 
-        
-        return res;
-    }
-    
-    public void fillSchedule(ArrayDay arr){
-
-        List<Day> days = arr.getDays();
-
-        File dir = new File("..\\..\\Data\\Chats\\"+this.id+"\\Schedule");
-
-        if (dir.exists()) {
-            File[] contents = dir.listFiles();
-            if (contents != null) for (File f : contents) f.delete();
-            dir.delete();
-        }
-        
-        dir.mkdirs();
-       
-        for (int i = 0; i <= 5; i++){
-            
-            Day d = days.get(arr.getCurrDay() + i);
-            
-            File f = new File("..\\..\\Data\\Chats\\"+this.id+"\\Schedule\\"+i+".txt");
-            
-            try (FileWriter wf = new FileWriter(f)) {
-                f.createNewFile();
-                wf.write(d.toString());  
-            } catch (IOException ex) {
-                MyLogger.logger(ex, "Не удалось создать файл/записать в файл ..\\Data\\Chats\\"+this.id+"\\Schedule"+i+".txt");
-            }
-        }
-    }
-    
-    public String getDaySchedule(int i){
-
-        String res = "";
-        
-        File f = new File("..\\..\\Data\\Chats\\"+this.id+"\\Schedule\\"+i+".txt");
-        
-        try (Scanner sc = new Scanner(f);){
-            while(sc.hasNextLine())res += sc.nextLine() + "\n";
-        } catch (IOException ex) {
-            MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\Chats\\"+this.id+"\\Schedule\\"+i+".txt");
-        }
-        
-        return res;
-    }
-    
-    public List<List<InlineKeyboardButton>> getScheduleButtons(){
-        
-        List<List<InlineKeyboardButton>> vars = new ArrayList<>();
-        
-        File dir = new File("..\\..\\Data\\Chats\\"+this.id+"\\Schedule");
-        File[] files;
-        
-        if (dir.exists()) files = dir.listFiles();
-        else return null;
-        
-        for (File file : files) {
-            
-            String name = "День";
-            
-            try (Scanner sc = new Scanner(file);){
-                name = sc.nextLine();  
-                name = name.substring(4, name.length()-4);
-            } catch (IOException ex) {
-                MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\Chats\\"+this.id+"\\Schedule\\"+file.getName()+".txt");
-            }
-
-            vars.add(new ArrayList<>());
-            
-            vars.get(vars.size()-1).add(InlineKeyboardButton
-                            .builder()
-                            .text(name)
-                            .callbackData("schedule: " + file.getName().substring(0, 1))
-                            .build());
-        }
-       
-        return vars;
-    }
-    
-    public List<List<InlineKeyboardButton>> getClearNListButton(){
-        
-        List<List<InlineKeyboardButton>> vars = new ArrayList<>();
-        
-        vars.add(new ArrayList<>());
-            
-        vars.get(vars.size()-1).add(InlineKeyboardButton
-                            .builder()
-                            .text("Очистить список")
-                            .callbackData("clear NList")
-                            .build());
-        
-        return vars;
-    }
-    
-    public List<List<InlineKeyboardButton>> getGroupButton(){
-        
-        List<List<InlineKeyboardButton>> vars = new ArrayList<>();
-        
-        vars.add(new ArrayList<>());
-            
-        vars.get(vars.size()-1).add(InlineKeyboardButton
-                            .builder()
-                            .text("Попробовать снова")
-                            .callbackData("try /group")
-                            .build());
-        
-        return vars;
-    }
-    
-    public List<List<InlineKeyboardButton>> getRandomButton(){
-        
-        List<List<InlineKeyboardButton>> vars = new ArrayList<>();
-        
-        vars.add(new ArrayList<>());
-            
-        vars.get(vars.size()-1).add(InlineKeyboardButton
-                            .builder()
-                            .text("Попробовать снова")
-                            .callbackData("try /random")
-                            .build());
-        
-        return vars;
-    }
-    
-    public void addToNList(User user){
-        
-        File dir = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery");
-        
-        if (!dir.exists()) dir.mkdirs();
-        
-        File file = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery\\"+user.getId()+".txt");
-            
-        try (FileWriter wr = new FileWriter(file)){
-            file.createNewFile();
-            wr.write(user.getFirstName());
-        } catch (IOException ex) {
-            MyLogger.logger(ex, "Не удалось создать файл/записать в файл ..\\Data\\Chats\\"+this.id+"\\UsersQuery" + user.getId() + ".txt");
-        }
-    }
-    
-    public String getNList(){
-        
-        File userDir = new File("..\\..\\Data\\Chats\\"+this.id+"\\UsersQuery");
-        if (!userDir.exists()) return null;
-        
-        File[] users = userDir.listFiles();
-
-        String res = "Просили не отмечать:\n";
-        int i = 0;
-        
-        for (File file : users){
-            
-            try(Scanner sc = new Scanner(file)){
-                res += ++i + ") "+ sc.nextLine() + "\n";
-            } catch (IOException ex) {
-                MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\Chats\\"+this.id+"\\UsersQuery\\"+file.getName()+".txt");
-            } 
-        }
-        
-        return res;
-    }
-    
-    public void clearNList(){
-        File dir = new File("..\\..\\Data\\Chats\\" + this.id + "\\UsersQuery");
-                
-        if (dir.exists()){
-            File [] files = dir.listFiles();
-            if (files != null) for (File file : files) file.delete();
-            dir.delete();
-        }          
-    }
-    
-    public void addToСList(String c){
-        
-        File dir = new File("..\\..\\Data\\Chats\\"+this.id+"\\C");
-        
-        if (!dir.exists()) dir.mkdirs();
-        
-        int i = dir.listFiles().length;
-        
-        File file = new File("..\\..\\Data\\Chats\\"+this.id+"\\C\\"+i+".txt");
-            
-        try (FileWriter wr = new FileWriter(file)){
-            file.createNewFile();
-            wr.write(c);
-        } catch (IOException ex) {
-            MyLogger.logger(ex, "Не удалось создать файл/записать в файл ..\\Data\\Chats\\"+this.id+"\\C\\" + i + ".txt");
-        }
-    }
-      
-    public String getC(){
-        
-        File userDir = new File("..\\..\\Data\\Chats\\"+this.id+"\\C");
-        if (!userDir.exists()) return "Cписок цитат пуст";
-        
-        File[] users = userDir.listFiles();
-
-        int i = (int) (Math.random()*users.length);
-            
-        try(Scanner sc = new Scanner(users[i])){
-            return sc.nextLine();
-        } catch (IOException ex) {
-            MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\Chats\\"+this.id+"\\C\\"+i+".txt");
-            return "Не удалось загрузить цитату";
-        } 
-    }
-    
-    public void clearCList(){
-        
-        File userDir = new File("..\\..\\Data\\Chats\\"+this.id+"\\C");
-        if (!userDir.exists()) return;
-        
-        File[] users = userDir.listFiles();
-        for (File file : users)file.delete();
-
-        userDir.delete();
-    }
-    
-    public void removeLastC(){
-        
-        File userDir = new File("..\\..\\Data\\Chats\\"+this.id+"\\C");
-        if (!userDir.exists()) return;
-        
-        File[] users = userDir.listFiles();
-        users[users.length - 1].delete();
-        
-        if (users.length == 1) userDir.delete();
-    }
-    
     public void push(String state){
         File f = new File("..\\..\\Data\\Chats\\"+this.id+"\\push.txt");
         
@@ -351,6 +89,284 @@ public class MyChat {
             wf.write(state);
         } catch (IOException ex) {
             MyLogger.logger(ex, "Не удалось внести данные в ..\\..\\Data\\Chats\\"+this.id+"\\push.txt");
+        }
+    }
+    
+    public class MyGroup{
+        
+        public boolean setGroup(String group) throws IOException {
+
+            Document document = Jsoup.connect("https://rasp.sstu.ru/").get();
+            Elements groups = document.select(".card > .collapse > .card-body > .groups > .col > .no-gutters > .group > a");
+
+            for (Element e : groups){
+                if (e.text().equals(group)){
+
+                    String res = "https://rasp.sstu.ru" + e.attr("href");
+
+                    try (FileWriter f = new FileWriter("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\group.txt")) {
+                        f.write(res);
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public String getGroup(){
+
+            String res = null;
+
+            File f = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\group.txt");
+
+            try (Scanner sc = new Scanner(f);) {
+                res = sc.nextLine();
+            } catch (IOException ex) {
+                MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\Chats\\"+MyChat.this.id+"\\group.txt");
+            } 
+
+            return res;
+        }
+    }
+    
+    public class Schedule{
+
+        public void fillSchedule(ArrayDay arr){
+
+            List<Day> days = arr.getDays();
+
+            File dir = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\Schedule");
+
+            if (dir.exists()) {
+                File[] contents = dir.listFiles();
+                if (contents != null) for (File f : contents) f.delete();
+                dir.delete();
+            }
+
+            dir.mkdirs();
+
+            for (int i = 0; i <= 5; i++){
+
+                Day d = days.get(arr.getCurrDay() + i);
+
+                File f = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\Schedule\\"+i+".txt");
+
+                try (FileWriter wf = new FileWriter(f)) {
+                    f.createNewFile();
+                    wf.write(d.toString());  
+                } catch (IOException ex) {
+                    MyLogger.logger(ex, "Не удалось создать файл/записать в файл ..\\Data\\Chats\\"+MyChat.this.id+"\\Schedule"+i+".txt");
+                }
+            }
+        }
+
+        public String getDaySchedule(int i){
+
+            String res = "";
+
+            File f = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\Schedule\\"+i+".txt");
+
+            try (Scanner sc = new Scanner(f);){
+                while(sc.hasNextLine())res += sc.nextLine() + "\n";
+            } catch (IOException ex) {
+                MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\Chats\\"+MyChat.this.id+"\\Schedule\\"+i+".txt");
+            }
+
+            return res;
+        }
+    }
+    
+    public class Buttons{
+        
+        public List<List<InlineKeyboardButton>> getScheduleButtons(){
+
+            List<List<InlineKeyboardButton>> vars = new ArrayList<>();
+
+            File dir = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\Schedule");
+            File[] files;
+
+            if (dir.exists()) files = dir.listFiles();
+            else return null;
+
+            for (File file : files) {
+
+                String name = "День";
+
+                try (Scanner sc = new Scanner(file);){
+                    name = sc.nextLine();  
+                    name = name.substring(4, name.length()-4);
+                } catch (IOException ex) {
+                    MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\Chats\\"+MyChat.this.id+"\\Schedule\\"+file.getName()+".txt");
+                }
+
+                vars.add(new ArrayList<>());
+
+                vars.get(vars.size()-1).add(InlineKeyboardButton
+                                .builder()
+                                .text(name)
+                                .callbackData("schedule: " + file.getName().substring(0, 1))
+                                .build());
+            }
+
+            return vars;
+        }
+
+        public List<List<InlineKeyboardButton>> getClearNListButton(){
+
+            List<List<InlineKeyboardButton>> vars = new ArrayList<>();
+
+            vars.add(new ArrayList<>());
+
+            vars.get(vars.size()-1).add(InlineKeyboardButton
+                                .builder()
+                                .text("Очистить список")
+                                .callbackData("clear NList")
+                                .build());
+
+            return vars;
+        }
+
+        public List<List<InlineKeyboardButton>> getGroupButton(){
+
+            List<List<InlineKeyboardButton>> vars = new ArrayList<>();
+
+            vars.add(new ArrayList<>());
+
+            vars.get(vars.size()-1).add(InlineKeyboardButton
+                                .builder()
+                                .text("Попробовать снова")
+                                .callbackData("try /group")
+                                .build());
+
+            return vars;
+        }
+
+        public List<List<InlineKeyboardButton>> getRandomButton(){
+
+            List<List<InlineKeyboardButton>> vars = new ArrayList<>();
+
+            vars.add(new ArrayList<>());
+
+            vars.get(vars.size()-1).add(InlineKeyboardButton
+                                .builder()
+                                .text("Попробовать снова")
+                                .callbackData("try /random")
+                                .build());
+
+            return vars;
+        }
+    }
+    
+    public class NList{
+        
+        public void addToNList(User user){
+
+            File dir = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\UsersQuery");
+
+            if (!dir.exists()) dir.mkdirs();
+
+            File file = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\UsersQuery\\"+user.getId()+".txt");
+
+            try (FileWriter wr = new FileWriter(file)){
+                file.createNewFile();
+                wr.write(user.getFirstName());
+            } catch (IOException ex) {
+                MyLogger.logger(ex, "Не удалось создать файл/записать в файл ..\\Data\\Chats\\"+MyChat.this.id+"\\UsersQuery" + user.getId() + ".txt");
+            }
+        }
+
+        public String getNList(){
+
+            File userDir = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\UsersQuery");
+            if (!userDir.exists()) return null;
+
+            File[] users = userDir.listFiles();
+
+            String res = "Просили не отмечать:\n";
+            int i = 0;
+
+            for (File file : users){
+
+                try(Scanner sc = new Scanner(file)){
+                    res += ++i + ") "+ sc.nextLine() + "\n";
+                } catch (IOException ex) {
+                    MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\Chats\\"+MyChat.this.id+"\\UsersQuery\\"+file.getName()+".txt");
+                } 
+            }
+
+            return res;
+        }
+
+        public void clearNList(){
+            File dir = new File("..\\..\\Data\\Chats\\" + MyChat.this.id + "\\UsersQuery");
+
+            if (dir.exists()){
+                File [] files = dir.listFiles();
+                if (files != null) for (File file : files) file.delete();
+                dir.delete();
+            }          
+        }
+    }
+    
+    public class CList{
+        
+        public void addToСList(String c){
+
+            File dir = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\C");
+
+            if (!dir.exists()) dir.mkdirs();
+
+            int i = dir.listFiles().length;
+
+            File file = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\C\\"+i+".txt");
+
+            try (FileWriter wr = new FileWriter(file)){
+                file.createNewFile();
+                wr.write(c);
+            } catch (IOException ex) {
+                MyLogger.logger(ex, "Не удалось создать файл/записать в файл ..\\Data\\Chats\\"+MyChat.this.id+"\\C\\" + i + ".txt");
+            }
+        }
+
+        public String getC(){
+
+            File userDir = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\C");
+            if (!userDir.exists()) return "Cписок цитат пуст";
+
+            File[] users = userDir.listFiles();
+
+            int i = (int) (Math.random()*users.length);
+
+            try(Scanner sc = new Scanner(users[i])){
+                return sc.nextLine();
+            } catch (IOException ex) {
+                MyLogger.logger(ex, "Не удалось считать данные из ..\\Data\\Chats\\"+MyChat.this.id+"\\C\\"+i+".txt");
+                return "Не удалось загрузить цитату";
+            } 
+        }
+
+        public void clearCList(){
+
+            File userDir = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\C");
+            if (!userDir.exists()) return;
+
+            File[] users = userDir.listFiles();
+            for (File file : users)file.delete();
+
+            userDir.delete();
+        }
+
+        public void removeLastC(){
+
+            File userDir = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\C");
+            if (!userDir.exists()) return;
+
+            File[] users = userDir.listFiles();
+            users[users.length - 1].delete();
+
+            if (users.length == 1) userDir.delete();
         }
     }
 }

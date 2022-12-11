@@ -24,7 +24,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 public class Bot extends TelegramLongPollingBot{
     
-    BotFunctions tools = new BotFunctions();
+    private final BotFunctions tools = new BotFunctions();
     
     @Override
     public String getBotToken(){  

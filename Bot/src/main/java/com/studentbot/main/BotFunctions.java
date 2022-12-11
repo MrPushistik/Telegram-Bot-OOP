@@ -25,13 +25,13 @@ public class BotFunctions {
         BotExecutor func1;
         func1 = (bot, chat, message) -> {
             try {
-                chat.fillSchedule(new ArrayDay(Jsoup.connect(chat.getGroup()).get()));
+                chat.schedule.fillSchedule(new ArrayDay(Jsoup.connect(chat.mygroup.getGroup()).get()));
             } catch (IOException ex) {
                 MyLogger.logger(ex, "Не удолость получить страницу распиания");
                 return;
             }
 
-            List<List<InlineKeyboardButton>> tmp = chat.getScheduleButtons();
+            List<List<InlineKeyboardButton>> tmp = chat.buttons.getScheduleButtons();
 
             if(tmp!= null)
                 bot.simpleTextMessage(message, "Выберите день", InlineKeyboardMarkup.builder().keyboard(tmp).build()); 
@@ -47,15 +47,15 @@ public class BotFunctions {
         BotExecutor func3 = (bot, chat, message) -> {
             StringHolder h = StringHolder.getStringHolder();
             bot.simpleTextMessage(message, message.getFrom().getFirstName() + h.getString(), null);
-            chat.addToNList(message.getFrom());
+            chat.nList.addToNList(message.getFrom());
         };
         
         BotExecutor func4 = (bot, chat, message) -> {
-            String tmp = chat.getNList();
+            String tmp = chat.nList.getNList();
             if (tmp == null)
                 bot.simpleTextMessage(message, "Список пуст", null);
             else
-                bot.simpleTextMessage(message, chat.getNList(), InlineKeyboardMarkup.builder().keyboard(chat.getClearNListButton()).build()); 
+                bot.simpleTextMessage(message, chat.nList.getNList(), InlineKeyboardMarkup.builder().keyboard(chat.buttons.getClearNListButton()).build()); 
         };
         
         BotExecutor func5 = (bot, chat, message) -> {
@@ -84,16 +84,16 @@ public class BotFunctions {
         };
         
         BotExecutor func10 = (bot, chat, message) -> {
-            bot.simpleTextMessage(message, chat.getC(), null);
+            bot.simpleTextMessage(message, chat.cList.getC(), null);
         };
         
         BotExecutor func11 = (bot, chat, message) -> {
-            chat.clearCList();
+            chat.cList.clearCList();
             bot.simpleTextMessage(message, "Циатник очищен", null);
         };
         
         BotExecutor func12 = (bot, chat, message) -> {
-            chat.removeLastC();
+            chat.cList.removeLastC();
             bot.simpleTextMessage(message, "Последняя цитата удалена", null);
         };
         
@@ -101,10 +101,10 @@ public class BotFunctions {
             String group = message.getText();
 
             try {
-                if (chat.setGroup(group))
+                if (chat.mygroup.setGroup(group))
                 bot.simpleTextMessage(message, "Группа " + group + " успешно установлена", null);
             else
-                bot.simpleTextMessage(message, "Группа не была установлена. Убедитесь в существовании группы " + group, InlineKeyboardMarkup.builder().keyboard(chat.getGroupButton()).build());
+                bot.simpleTextMessage(message, "Группа не была установлена. Убедитесь в существовании группы " + group, InlineKeyboardMarkup.builder().keyboard(chat.buttons.getGroupButton()).build());
             } catch (IOException ex) {
                 bot.simpleTextMessage(message, "К сожалению, операция невозможна на данный момент", null);
                 MyLogger.logger(ex, "Некорретная работа setGroup");
@@ -121,10 +121,10 @@ public class BotFunctions {
                 bot.simpleTextMessage(message, ("Результат: " + res), null);
             }
             catch(NumberFormatException ex){
-                bot.simpleTextMessage(message, "Введено не число", InlineKeyboardMarkup.builder().keyboard(chat.getRandomButton()).build());
+                bot.simpleTextMessage(message, "Введено не число", InlineKeyboardMarkup.builder().keyboard(chat.buttons.getRandomButton()).build());
             }
             catch(IllegalArgumentException ex){
-                bot.simpleTextMessage(message, "Кол-во вариантов должно быть не менее 2", InlineKeyboardMarkup.builder().keyboard(chat.getRandomButton()).build());
+                bot.simpleTextMessage(message, "Кол-во вариантов должно быть не менее 2", InlineKeyboardMarkup.builder().keyboard(chat.buttons.getRandomButton()).build());
             }
         };
         
@@ -133,18 +133,18 @@ public class BotFunctions {
         };
         
         BotExecutor repl4 = (bot,chat,message)->{
-            chat.addToСList(message.getText()); 
+            chat.cList.addToСList(message.getText()); 
             bot.simpleTextMessage(message, "Цитата установлена", null); 
         };
         
-        BotExecutor ex1 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.getDaySchedule(0), null);};
-        BotExecutor ex2 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.getDaySchedule(1), null);};
-        BotExecutor ex3 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.getDaySchedule(2), null);};
-        BotExecutor ex4 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.getDaySchedule(3), null);};
-        BotExecutor ex5 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.getDaySchedule(4), null);};
-        BotExecutor ex6 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.getDaySchedule(5), null);};
+        BotExecutor ex1 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.schedule.getDaySchedule(0), null);};
+        BotExecutor ex2 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.schedule.getDaySchedule(1), null);};
+        BotExecutor ex3 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.schedule.getDaySchedule(2), null);};
+        BotExecutor ex4 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.schedule.getDaySchedule(3), null);};
+        BotExecutor ex5 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.schedule.getDaySchedule(4), null);};
+        BotExecutor ex6 = (bot,chat,message)-> {bot.simpleTextMessage(message, chat.schedule.getDaySchedule(5), null);};
         BotExecutor ex7 = (bot,chat,message)-> {
-            chat.clearNList();
+            chat.nList.clearNList();
             bot.simpleTextMessage(message, "Список очищен", null);
         };
 
