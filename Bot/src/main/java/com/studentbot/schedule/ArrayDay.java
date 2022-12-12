@@ -15,13 +15,16 @@ public class ArrayDay {
     public ArrayDay(Document document){
         
         Elements daysNode = document.select(".day");
-            
+        
+        int j = -1;
+          
         for (int i = 0; i < daysNode.size(); i++){
             
             if (i%7==0) continue;
-
+            j++;
+            
             Element dayNode = daysNode.get(i);
-            if (dayNode.hasClass("day-current")) this.currDay = i;
+            if (dayNode.hasClass("day-current")) this.currDay = j;
 
             List<Lesson> arrLessons = new ArrayList<>();
             Elements lessonsNode = dayNode.select(".day-lesson > div");

@@ -134,7 +134,7 @@ public class MyChat {
     public class Schedule{
 
         public void fillSchedule(ArrayDay arr){
-
+             
             List<Day> days = arr.getDays();
 
             File dir = new File("..\\..\\Data\\Chats\\"+MyChat.this.id+"\\Schedule");
